@@ -32,23 +32,25 @@ const showImages = (images) => {
 const getImages = (query) => {
   setTimeout(() => {
     fetch(`https://pixabay.com/api/?key=${KEY}=${query}&image_type=photo&pretty=true`)
-    .then(response => response.json())
+      .then(response => response.json())
       .then(data => showImages(data.hits))
-      .catch(err => console.log(err))
+      .catch(error => displayWarning('somthing went to wrong'))
   }, 1000);
 }
 
 let slideIndex = 0;
 const selectItem = (event, img) => {
   let element = event.target;
-  element.classList.add('added');
+  element.classList.toggle('added');
 
   let item = sliders.indexOf(img);
   if (item === -1) {
     sliders.push(img);
+  } else {
+    sliders.pop(img)
   }
-}
-var timer
+};
+var timer;
 const createSlider = () => {
   // check slider image length
   if (sliders.length < 2) {
@@ -83,7 +85,7 @@ const createSlider = () => {
     slideIndex++;
     changeSlide(slideIndex);
   }, durations);
- 
+
 }
 
 // change slider index 
@@ -93,7 +95,6 @@ const changeItem = index => {
 
 // change slide item
 const changeSlide = (index) => {
-
   const items = document.querySelectorAll('.slider-item');
   if (index < 0) {
     slideIndex = items.length - 1
@@ -111,35 +112,37 @@ const changeSlide = (index) => {
 
   items[index].style.display = "block"
 }
-
 // enter btn evenHandler
 document.getElementById('search').addEventListener('keypress', function (event) {
-  if (event.key == 'Enter') {
+  if (event.key === 'Enter') {
     document.getElementById('search-btn').click()
   }
 })
 
 // search button EvenHandler
 searchBtn.addEventListener('click', function () {
-  document.querySelector('.main').style.display = 'none';
-  clearInterval(timer);
   const search = document.getElementById('search');
-  getImages(search.value)
-  sliders.length = 0;
-  toggleSpinner();
+  const emptyDiv = document.getElementById('emptyWarning');
+  if (search.value === "") {
+    emptyDiv.style.display = 'block'
+  } else {
+    document.querySelector('.main').style.display = 'none';
+    clearInterval(timer);
+    getImages(search.value)
+    sliders.length = 0;
+    emptyDiv.innerText = ''
+    toggleSpinner();
+  }
 })
-
 // slider button EvenHandler
 sliderBtn.addEventListener('click', function () {
   const durations = document.getElementById('duration').value || 1000
-    if(durations < 0){
-      alert('nagetive number is not allowed')
-    } else {
-      createSlider()
-    }
-  
+  if (durations < 0) {
+    alert('nagetive number is not allowed')
+  } else {
+    createSlider()
+  }
 })
-
 // toggleSpinner
 const toggleSpinner = () => {
   const spinner = document.getElementById('loading-spinner').classList;
@@ -147,3 +150,8 @@ const toggleSpinner = () => {
   spinner.toggle('d-none');
   imageSection.toggle('d-none');
 };
+// warning
+const displayWarning = (error) => {
+  const errorDiv = document.getElementById('warning');
+  errorDiv.innerText = error
+}
